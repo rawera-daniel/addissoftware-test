@@ -7,6 +7,9 @@ app.get("/", (req, res) => {
 });
 
 // 1) Middlewares
+if (process.env.NODE_ENV === "production") {
+  console.log("we're in production environment");
+}
 app.use(express.json());
 
 // 2) ROUTES
