@@ -1,6 +1,6 @@
 const Song = require('../models/songModel');
 
-exports.createTour = async (req, res) => {
+exports.createSong = async (req, res) => {
   try {
     const newSong = await Song.create(req.body);
 
