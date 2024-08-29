@@ -5,11 +5,13 @@ const {
   updateSong,
   deleteSong,
   getSongStats,
+  getSongsByGenre,
 } = require('../controllers/songController');
 
 const router = express.Router();
 
 router.route('/song-stats').get(getSongStats);
+router.route('/songs-by-genre').get(getSongsByGenre);
 
 router.route('/').get(getAllSongs).post(createSong);
 

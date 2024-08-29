@@ -110,3 +110,38 @@ exports.getSongStats = async (req, res) => {
     });
   }
 };
+
+exports.getSongsByGenre = async (req, res) => {
+  try {
+    const songsByGenre = await Song.aggregate([
+      {
+        $group: {
+          _id: '$genre',
+          songCount: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          genre: '$_id',
+          songCount: 1,
+        },
+      },
+      {
+        $sort: { songCount: -1 },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        songsByGenre,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
