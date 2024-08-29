@@ -145,3 +145,40 @@ exports.getSongsByGenre = async (req, res) => {
     });
   }
 };
+
+exports.getSongsAndAlbumsByArtist = async (req, res) => {
+  try {
+    const songsAndAlbumsByArtist = await Song.aggregate([
+      {
+        $group: {
+          _id: '$artist',
+          songCount: { $sum: 1 },
+          albumCount: { $addToSet: '$album' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          artist: '$_id',
+          songCount: 1,
+          albumCount: { $size: '$albumCount' },
+        },
+      },
+      {
+        $sort: { artist: 1 },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        songsAndAlbumsByArtist,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
