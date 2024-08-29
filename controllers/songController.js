@@ -111,31 +111,28 @@ exports.getSongStats = async (req, res) => {
   }
 };
 
-exports.getSongsByGenre = async (req, res) => {
+const getSongsByField = async (field, res, dataLabel) => {
   try {
-    const songsByGenre = await Song.aggregate([
+    const songsByField = await Song.aggregate([
       {
         $group: {
-          _id: '$genre',
+          _id: `$${field}`,
           songCount: { $sum: 1 },
         },
       },
       {
         $project: {
           _id: 0,
-          genre: '$_id',
+          [field]: '$_id',
           songCount: 1,
         },
-      },
-      {
-        $sort: { songCount: -1 },
       },
     ]);
 
     res.status(200).json({
       status: 'success',
       data: {
-        songsByGenre,
+        [dataLabel]: songsByField,
       },
     });
   } catch (err) {
@@ -145,6 +142,9 @@ exports.getSongsByGenre = async (req, res) => {
     });
   }
 };
+
+exports.getSongsByGenre = (req, res) =>
+  getSongsByField('genre', res, 'songsByGenre');
 
 exports.getSongsAndAlbumsByArtist = async (req, res) => {
   try {
@@ -182,3 +182,6 @@ exports.getSongsAndAlbumsByArtist = async (req, res) => {
     });
   }
 };
+
+exports.getSongsByAlbum = (req, res) =>
+  getSongsByField('album', res, 'songsByAlbum');
