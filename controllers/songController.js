@@ -73,3 +73,40 @@ exports.deleteSong = async (req, res) => {
     });
   }
 };
+
+exports.getSongStats = async (req, res) => {
+  try {
+    const songStats = await Song.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalSongs: { $sum: 1 },
+          totalArtists: { $addToSet: '$artist' },
+          totalAlbums: { $addToSet: '$album' },
+          totalGenres: { $addToSet: '$genre' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalSongs: 1,
+          totalArtists: { $size: '$totalArtists' },
+          totalAlbums: { $size: '$totalAlbums' },
+          totalGenres: { $size: '$totalGenres' },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        songStats,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
