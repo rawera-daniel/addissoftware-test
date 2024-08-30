@@ -12,6 +12,11 @@ app.use(express.json());
 // 2) ROUTES
 app.use('/api/v1/songs', songRouter);
 
+// Handle unhandled routes
+app.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
 // Global error handling middleware
 app.use(globalErrorHandler);
 module.exports = app;
