@@ -1,7 +1,8 @@
 const Song = require('../models/songModel');
 const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
-exports.createSong = catchAsync(async (req, res) => {
+exports.createSong = catchAsync(async (req, res, next) => {
   const newSong = await Song.create(req.body);
 
   res.status(201).json({
@@ -12,7 +13,7 @@ exports.createSong = catchAsync(async (req, res) => {
   });
 });
 
-exports.getAllSongs = catchAsync(async (req, res) => {
+exports.getAllSongs = catchAsync(async (req, res, next) => {
   const songs = await Song.find();
 
   res.status(200).json({
@@ -24,11 +25,15 @@ exports.getAllSongs = catchAsync(async (req, res) => {
   });
 });
 
-exports.updateSong = catchAsync(async (req, res) => {
+exports.updateSong = catchAsync(async (req, res, next) => {
   const song = await Song.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
+
+  if (!song) {
+    return next(new AppError('No song found with that ID', 404));
+  }
 
   res.status(200).json({
     status: 'success',
@@ -38,8 +43,12 @@ exports.updateSong = catchAsync(async (req, res) => {
   });
 });
 
-exports.deleteSong = catchAsync(async (req, res) => {
-  await Song.findByIdAndDelete(req.params.id);
+exports.deleteSong = catchAsync(async (req, res, next) => {
+  const song = await Song.findByIdAndDelete(req.params.id);
+
+  if (!song) {
+    return next(new AppError('No song found with that ID', 404));
+  }
 
   res.status(204).json({
     status: 'success',
@@ -47,7 +56,7 @@ exports.deleteSong = catchAsync(async (req, res) => {
   });
 });
 
-exports.getSongStats = catchAsync(async (req, res) => {
+exports.getSongStats = catchAsync(async (req, res, next) => {
   const songStats = await Song.aggregate([
     {
       $group: {
@@ -77,7 +86,7 @@ exports.getSongStats = catchAsync(async (req, res) => {
   });
 });
 
-const getSongsByField = catchAsync(async (field, res, dataLabel) => {
+const getSongsByField = catchAsync(async (field, res, dataLabel, next) => {
   const songsByField = await Song.aggregate([
     {
       $group: {
@@ -102,10 +111,10 @@ const getSongsByField = catchAsync(async (field, res, dataLabel) => {
   });
 });
 
-exports.getSongsByGenre = (req, res) =>
+exports.getSongsByGenre = (req, res, next) =>
   getSongsByField('genre', res, 'songsByGenre');
 
-exports.getSongsAndAlbumsByArtist = catchAsync(async (req, res) => {
+exports.getSongsAndAlbumsByArtist = catchAsync(async (req, res, next) => {
   const songsAndAlbumsByArtist = await Song.aggregate([
     {
       $group: {
@@ -135,5 +144,5 @@ exports.getSongsAndAlbumsByArtist = catchAsync(async (req, res) => {
   });
 });
 
-exports.getSongsByAlbum = (req, res) =>
+exports.getSongsByAlbum = (req, res, next) =>
   getSongsByField('album', res, 'songsByAlbum');
