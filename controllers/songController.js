@@ -19,9 +19,10 @@ exports.getAllSongs = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     results: songs.length,
-    data: {
-      songs,
-    },
+    // data: {
+    //   songs,
+    // },
+    songs,
   });
 });
 

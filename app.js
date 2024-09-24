@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -8,6 +9,7 @@ const app = express();
 
 // 1) Middlewares
 app.use(express.json());
+app.use(cors());
 
 // 2) ROUTES
 app.use('/api/v1/songs', songRouter);
